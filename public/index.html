@@ -651,7 +651,8 @@
     </div>
 </nav>
 
-<audio id="audio" crossorigin="anonymous"></audio>
+<audio id="audio" preload="auto"></audio>
+
 
 <!-- ===== JAVASCRIPT ===== -->
 <script>
@@ -853,8 +854,31 @@ const App = {
         App._updatePlayerUI(song);
 
         // Load audio via invidious proxy
-        const audioSrc = `https://inv.tux.pizza/latest_version?id=${song.videoId}&itag=140`;
-        audio.src = audioSrc;
+        const instances = [
+    'https://invidious.projectsegfau.lt',
+    'https://inv.tux.pizza',
+    'https://invidious.sethforprivacy.com',
+    'https://iv.melmac.space'
+];
+
+// Mencoba instansi pertama (indeks 0)
+let instanceIdx = 0;
+const audioSrc = `${instances[instanceIdx]}/latest_version?id=${song.videoId}&itag=140`;
+
+audio.src = audioSrc;
+
+// Tambahkan penanganan error jika link mati
+audio.onerror = () => {
+    if (instanceIdx < instances.length - 1) {
+        instanceIdx++;
+        console.log("Mencoba server cadangan...");
+        audio.src = `${instances[instanceIdx]}/latest_version?id=${song.videoId}&itag=140`;
+        audio.play();
+    } else {
+        toast("Semua server sibuk. Coba lagi nanti.");
+    }
+};
+
         audio.play().then(() => {
             State.playing = true;
             App._setPlayIcon(true);
