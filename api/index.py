@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from ytmusicapi import YTMusic
 import time
+import os
 
 app = FastAPI()
 
@@ -53,6 +56,13 @@ def get_home_data():
         return {"status": "success", "data": data}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+# Serve the single-file HTML frontend
+@app.get("/", response_class=HTMLResponse)
+def serve_frontend():
+    html_path = os.path.join(os.path.dirname(__file__), "index.html")
+    with open(html_path, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 # Vercel handler
 handler = app
